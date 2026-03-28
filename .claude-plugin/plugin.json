@@ -1,0 +1,21 @@
+{
+  "name": "claude-census",
+  "description": "Track and analyze Claude Code tool usage — discover which skills, agents, MCP tools, and commands are actually used, find zombie configs, and visualize usage trends.",
+  "version": "0.1.0",
+  "author": {
+    "name": "jyunkai"
+  },
+  "homepage": "https://github.com/jyunkai/claude-census",
+  "repository": "https://github.com/jyunkai/claude-census",
+  "license": "MIT",
+  "keywords": [
+    "usage-tracking",
+    "analytics",
+    "skills",
+    "agents",
+    "mcp",
+    "zombie-detection",
+    "observability",
+    "claude-code"
+  ]
+}

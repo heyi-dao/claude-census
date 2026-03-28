@@ -1,0 +1,17 @@
+{
+  "description": "Track skill, agent, MCP, command, plan mode, and LSP usage",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Skill|Agent|mcp__.*|EnterPlanMode|ExitPlanMode|LSP",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/log-event.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

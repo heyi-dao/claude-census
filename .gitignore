@@ -1,0 +1,10 @@
+# Runtime data (SQLite database)
+data/
+
+# macOS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
