@@ -16,6 +16,26 @@ fi
 cmd="${1:-summary}"
 shift 2>/dev/null || true
 
+# --- Input validation helpers ---
+validate_int() {
+  local val="$1" name="$2"
+  if ! [[ "$val" =~ ^[0-9]+$ ]]; then
+    echo "ERROR: $name must be a positive integer, got '$val'" >&2
+    exit 1
+  fi
+}
+
+validate_category() {
+  local val="$1"
+  case "$val" in
+    skill|agent|mcp|command|plan|lsp|other) ;;
+    *)
+      echo "ERROR: invalid category '$val'. Must be one of: skill, agent, mcp, command, plan, lsp, other" >&2
+      exit 1
+      ;;
+  esac
+}
+
 case "$cmd" in
   summary)
     sqlite3 -header -column "$DB" "
@@ -45,6 +65,7 @@ case "$cmd" in
 
   top)
     limit="${1:-15}"
+    validate_int "$limit" "limit"
     sqlite3 -header -column "$DB" "
       SELECT category, name, COUNT(*) as calls
       FROM events
@@ -58,6 +79,8 @@ case "$cmd" in
     cat_filter="${1:-}"
     limit="${2:-15}"
     if [ -n "$cat_filter" ]; then
+      validate_category "$cat_filter"
+      validate_int "$limit" "limit"
       sqlite3 -header -column "$DB" "
         SELECT name, COUNT(*) as calls
         FROM events
@@ -75,6 +98,7 @@ case "$cmd" in
   used-names)
     cat_filter="${1:-}"
     if [ -n "$cat_filter" ]; then
+      validate_category "$cat_filter"
       sqlite3 "$DB" "
         SELECT DISTINCT name FROM events
         WHERE category = '$cat_filter'
@@ -90,6 +114,7 @@ case "$cmd" in
 
   trends)
     days="${1:-30}"
+    validate_int "$days" "days"
     sqlite3 -header -column "$DB" "
       SELECT DATE(ts) as day, COUNT(*) as events
       FROM events
@@ -101,6 +126,7 @@ case "$cmd" in
 
   trends-by-category)
     days="${1:-30}"
+    validate_int "$days" "days"
     sqlite3 -header -column "$DB" "
       SELECT DATE(ts) as day, category, COUNT(*) as events
       FROM events

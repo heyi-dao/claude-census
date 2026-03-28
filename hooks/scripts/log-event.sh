@@ -33,8 +33,8 @@ try:
         ti.get("subagent_type", ""),
         ti.get("action", "")
     )
-except Exception:
-    print("" * 5)
+except (json.JSONDecodeError, KeyError, TypeError):
+    print("    ")
 ' 2>/dev/null || echo "")
 else
   # No JSON parser available, exit silently
@@ -88,9 +88,17 @@ case "$TOOL_NAME" in
     case "$_rest" in
       plugin_*)
         # e.g. plugin_playwright_playwright__browser_navigate
+        # Format: plugin_<pkg>_<class>__<method>
+        # When pkg == class (e.g. playwright_playwright), deduplicate to just pkg
         _server="${_rest%%__*}"
         _server="${_server#plugin_}"
         _tool="${_rest#*__}"
+        # Deduplicate: if _server is "X_X", reduce to "X"
+        _half="${_server%%_*}"
+        _other="${_server#*_}"
+        if [ "$_half" = "$_other" ]; then
+          _server="$_half"
+        fi
         NAME="${_server}/${_tool}"
         ;;
       claude_ai_*)
@@ -116,10 +124,10 @@ esac
 
 PROJECT_PATH="${CLAUDE_PROJECT_DIR:-}"
 
-# --- Initialize DB if needed ---
-if [ ! -f "$DB" ]; then
-  mkdir -p "$(dirname "$DB")"
-  sqlite3 "$DB" <<'SQL'
+# --- Initialize DB (always run, idempotent) ---
+mkdir -p "$(dirname "$DB")" || exit 0
+
+sqlite3 "$DB" <<'SQL'
 CREATE TABLE IF NOT EXISTS events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   ts TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
@@ -134,12 +142,12 @@ CREATE INDEX IF NOT EXISTS idx_events_name ON events(name);
 CREATE INDEX IF NOT EXISTS idx_events_project ON events(project_path);
 PRAGMA journal_mode=WAL;
 SQL
-fi
 
-# --- INSERT using parameterized-style escaping ---
-# Escape single quotes for SQL safety
+# --- INSERT ---
 _esc() { printf '%s' "$1" | sed "s/'/''/g"; }
 
-sqlite3 "$DB" "INSERT INTO events (category, name, session_id, project_path) VALUES ('$(_esc "$CATEGORY")','$(_esc "$NAME")','$(_esc "$SESSION_ID")','$(_esc "$PROJECT_PATH")');"
+if ! sqlite3 "$DB" "INSERT INTO events (category, name, session_id, project_path) VALUES ('$(_esc "$CATEGORY")','$(_esc "$NAME")','$(_esc "$SESSION_ID")','$(_esc "$PROJECT_PATH")');" 2>/dev/null; then
+  exit 0
+fi
 
 exit 0
