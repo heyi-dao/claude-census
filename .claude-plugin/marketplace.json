@@ -1,0 +1,19 @@
+{
+  "name": "claude-census",
+  "owner": {
+    "name": "jyunkai"
+  },
+  "metadata": {
+    "description": "Track and analyze Claude Code tool usage — discover which skills, agents, MCP tools, and commands are actually used, find zombie configs, and visualize usage trends.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "claude-census",
+      "source": "./",
+      "description": "Track and analyze Claude Code tool usage with zero token cost. PostToolUse hook logs every skill, agent, MCP tool, and command invocation to SQLite. /census command provides usage dashboard, zombie detection, and trend analysis.",
+      "category": "analytics",
+      "tags": ["usage-tracking", "analytics", "observability", "zombie-detection"]
+    }
+  ]
+}
