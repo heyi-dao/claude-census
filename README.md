@@ -34,7 +34,7 @@ Add to your `~/.claude/settings.json`:
     "claude-census": {
       "source": {
         "source": "git",
-        "url": "https://github.com/jyunkai/claude-census.git"
+        "url": "https://github.com/heyi-dao/claude-census.git"
       },
       "autoUpdate": true
     }
